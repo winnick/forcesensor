@@ -25,7 +25,8 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define AUTORELOAD	0x8000			//	sampling period definition (trigg period)
+#define AUTORELOAD	0x7A00			//	sampling period definition (trigg period)
+#define PRESCALER       512
 #define NUMB_SAMP	8						//	number of samples for SW filtering
 #define PEAK_FILTER	8						//  floating spot fall speed filter
 #define AD_STAB		20						//  AD stabilization [TIM1 increments] (~10us)

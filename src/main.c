@@ -50,6 +50,8 @@ uint16_t average_result(uint16_t *p, uint8_t smp) {
 	uint8_t  AD_samp;		// counter of stored samples
 	uint16_t AD_sample[NUMB_SAMP];	// store samples field 
 	uint16_t AD_avg_value;		// average of ADC result
+        
+        uint16_t result;
 
 void main(void)
 {
@@ -80,23 +82,12 @@ GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
   * ADC1 CONFIGURATION - skonfigurowac pomiar cykliczny wyzwalany timerem
   * co 0,5s
   */
+TIM2_DeInit();
+TIM2_TimeBaseInit(TIM2_PRESCALER_32, AUTORELOAD);
 
-TIM1->ARRH= (uint8_t)(AUTORELOAD >> 8);              // set autoreload register for trigger period
-TIM1->ARRL= (uint8_t)(AUTORELOAD); 
-TIM1->CCR1H= (uint8_t)((AUTORELOAD-AD_STAB) >> 8);   // set compare register for trigger period
-TIM1->CCR1L= (uint8_t)(AUTORELOAD-AD_STAB);
-TIM1->CR1|= TIM1_CR1_ARPE;		        // auto reload register is buferred
-	
-TIM1->CR2= (4<<4) & TIM1_CR2_MMS;	        // CC1REF is used as TRGO
-TIM1->CCMR1= (6<<4) & TIM1_CCMR_OCM;	        // CC1REF in PWM 1 mode
-TIM1->IER|= TIM1_IER_CC1IE;		        // CC1 interrupt enable
-TIM1->CCER1|= TIM1_CCER1_CC1P;		        // CC1 negative polarity
-TIM1->CCER1|= TIM1_CCER1_CC1E;		        // CC1 output enable
-TIM1->BKR|= TIM1_BKR_MOE;												
-	
-TIM1->SMCR|=  TIM1_SMCR_MSM;		        // synchronization of TRGO with ADC
-	
-TIM1->CR1|= TIM1_CR1_CEN;		        // timer 1 enable
+TIM2_ITConfig(TIM2_IT_UPDATE, ENABLE);
+
+
 
 ADC1_DeInit();
 ADC1_PrescalerConfig(ADC1_PRESSEL_FCPU_D8);
@@ -104,15 +95,17 @@ ADC1_ConversionConfig(ADC1_CONVERSIONMODE_SINGLE, ADC1_CHANNEL_2, ADC1_ALIGN_LEF
 ADC1_SchmittTriggerConfig(ADC1_SCHMITTTRIG_CHANNEL2, DISABLE);
 ADC1_ITConfig(ADC1_IT_EOCIE, ENABLE);
 ADC1_ExternalTriggerConfig(ADC1_EXTTRIG_TIM, ENABLE);
+
 // init ADC variables
-AD_samp= 0;                                     // number of stored samples 0
-ADInit= TRUE;                                   // ADC initialized 
+AD_samp = 0;                                     // number of stored samples 0
+ADInit = TRUE;                                   // ADC initialized 
 ADSampRdy= FALSE;                               // No sample
 
-ADC1_Cmd(ENABLE);
+
 
 enableInterrupts();
-
+ADC1_Cmd(ENABLE);
+TIM2_Cmd(ENABLE);
 //UART_send_str("Dzien dobry \n");
 
 i=1023;
@@ -123,13 +116,16 @@ UART_send_buf((uint8_t*)&i, sizeof(i)); // wysylanie dwoch bajtow danych
 /* Infinite loop */
   while (1)
   {
+    
        if (ADSampRdy == TRUE) {				   // field of ADC samples is ready?
-	AD_avg_value= average_result(&AD_sample[0], AD_samp); // average of samples
+	 UART_send_str(" | probka: ");
+       AD_avg_value= average_result(&AD_sample[0], AD_samp); // average of samples
 			
 	AD_samp= 0;    		                           // reinitalize ADC variables
 	ADSampRdy= FALSE;
 	
-	UART_send_buf((uint8_t*) &average_result, sizeof(AD_avg_value)); 
+	UART_send_buf((uint8_t*) &AD_avg_value, sizeof(AD_avg_value));
+        
         }
   }
 }

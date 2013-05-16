@@ -37,7 +37,9 @@ extern u8	ADSampRdy;					// flag for filed of samples ready
 extern u8 AD_samp;						// counter of raugh samples
 extern u16 AD_sample[NUMB_SAMP];	// store field of raugh samples
 extern u16 AD_avg_value;				// filtered ADC result
+extern u16 result;
 /* Private function prototypes -----------------------------------------------*/
+void UART_send_str(uint8_t * str);
 /* Private functions ---------------------------------------------------------*/
 /* Public functions ----------------------------------------------------------*/
 
@@ -238,9 +240,7 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
-	ADC1->CR1|= ADC1_CR1_ADON;		 // Wake-up/trigg the ADC 
-	TIM1->SR1&=~TIM1_SR1_CC1IF;	   // clear compare flag
-	return;  
+	
 }
 
 #ifdef STM8S903
@@ -278,6 +278,11 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+        ADC1->CR1|= ADC1_CR1_ADON;		 // Wake-up/trigg the ADC 
+        //UART_send_str(" cyk ");
+	
+        TIM2_ClearITPendingBit(TIM2_IT_UPDATE);      
+	return;  
  }
 
 /**
@@ -446,7 +451,9 @@ INTERRUPT_HANDLER(I2C_IRQHandler, 19)
 	}
 	else
 		ADInit= FALSE;					     // NO - ignore sample, wait for next one
-		
+
+   
+   
 	ADC1->CSR&=~ADC1_CSR_EOC;			 // clear end of conversion flag
 	ADC1->CR1&=~ADC1_CR1_ADON;	   // stop ADC
 	return;
@@ -477,6 +484,7 @@ INTERRUPT_HANDLER(TIM6_UPD_OVF_TRG_IRQHandler, 23)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+   
  }
 #endif /*STM8S903*/
 

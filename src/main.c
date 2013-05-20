@@ -25,6 +25,7 @@
 #include "stm8s_it.h"
 #include "stm8s_adc1.h"
 #include "stm8s_gpio.h"
+#include "stdio.h"
 #include "parameter.h"
 
 /* Private defines -----------------------------------------------------------*/
@@ -43,20 +44,22 @@ uint16_t average_result(uint16_t *p, uint8_t smp) {
 }
 /* Private functions ---------------------------------------------------------*/
 /* Variables -----------------------------------------------------------------*/
-	uint8_t  temp_AD_H;		// temporary registers for reading ADC result (MSB)
-	uint8_t  temp_AD_L;             // temporary registers for reading ADC result (LSB)
+        
 	uint8_t	 ADInit;		// flag for ADC initialized
 	uint8_t	 ADSampRdy;		// flag for filed of samples ready
 	uint8_t  AD_samp;		// counter of stored samples
 	uint16_t AD_sample[NUMB_SAMP];	// store samples field 
 	uint16_t AD_avg_value;		// average of ADC result
         
-        uint16_t result;
-
+        uint16_t AD_ch2_value;
+        uint16_t AD_ch3_value;
+        uint16_t AD_ch4_value;
+        
+        uint8_t Stored_Data [20];
+        
 void main(void)
 {
 /* Variables -----------------------------------------------------------------*/
-uint16_t i;
 
   
 /* Initializing --------------------------------------------------------------*/
@@ -83,7 +86,7 @@ GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
   * co 0,5s
   */
 TIM2_DeInit();
-TIM2_TimeBaseInit(TIM2_PRESCALER_32, AUTORELOAD);
+TIM2_TimeBaseInit(TIM2_PRESCALER_512, AUTORELOAD);
 
 TIM2_ITConfig(TIM2_IT_UPDATE, ENABLE);
 
@@ -91,42 +94,43 @@ TIM2_ITConfig(TIM2_IT_UPDATE, ENABLE);
 
 ADC1_DeInit();
 ADC1_PrescalerConfig(ADC1_PRESSEL_FCPU_D8);
-ADC1_ConversionConfig(ADC1_CONVERSIONMODE_SINGLE, ADC1_CHANNEL_2, ADC1_ALIGN_LEFT);
-ADC1_SchmittTriggerConfig(ADC1_SCHMITTTRIG_CHANNEL2, DISABLE);
+ADC1_ConversionConfig(ADC1_CONVERSIONMODE_SINGLE, ADC1_CHANNEL_4, ADC1_ALIGN_LEFT);
+ADC1_SchmittTriggerConfig(ADC1_SCHMITTTRIG_CHANNEL4, DISABLE);
 ADC1_ITConfig(ADC1_IT_EOCIE, ENABLE);
-ADC1_ExternalTriggerConfig(ADC1_EXTTRIG_TIM, ENABLE);
+
+ADC1_ScanModeCmd(ENABLE);
+ADC1_DataBufferCmd(ENABLE);
+
+
 
 // init ADC variables
-AD_samp = 0;                                     // number of stored samples 0
+AD_samp = 2;                                     // number of stored samples 0
 ADInit = TRUE;                                   // ADC initialized 
 ADSampRdy= FALSE;                               // No sample
-
-
 
 enableInterrupts();
 ADC1_Cmd(ENABLE);
 TIM2_Cmd(ENABLE);
-//UART_send_str("Dzien dobry \n");
-
-i=1023;
-
-UART_send_buf((uint8_t*)&i, sizeof(i)); // wysylanie dwoch bajtow danych
-
 
 /* Infinite loop */
   while (1)
   {
     
        if (ADSampRdy == TRUE) {				   // field of ADC samples is ready?
-	 UART_send_str(" | probka: ");
-       AD_avg_value= average_result(&AD_sample[0], AD_samp); // average of samples
-			
-	AD_samp= 0;    		                           // reinitalize ADC variables
-	ADSampRdy= FALSE;
-	
-	UART_send_buf((uint8_t*) &AD_avg_value, sizeof(AD_avg_value));
+//      AD_avg_value= average_result(&AD_sample[0], AD_samp); // average of samples
+	AD_samp= 2;   		                           // reinitalize ADC variables
+	AD_ch2_value = AD_sample[2];
+        AD_ch3_value = AD_sample[3];
+        AD_ch4_value = AD_sample[4];
+        UART_send_str(" | probka:1 ");
+        UART_send_buf((uint8_t*) &AD_ch2_value, sizeof(AD_ch2_value));
+        UART_send_str(" | probka:2 ");
+        UART_send_buf((uint8_t*) &AD_ch3_value, sizeof(AD_ch3_value));
+        UART_send_str(" | probka:3 ");
+        UART_send_buf((uint8_t*) &AD_ch4_value, sizeof(AD_ch4_value));
+        ADSampRdy= FALSE;
         
-        }
+       }
   }
 }
 

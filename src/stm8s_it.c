@@ -442,18 +442,22 @@ INTERRUPT_HANDLER(I2C_IRQHandler, 19)
        it is recommended to set a breakpoint on the following instruction.
     */
 		
-	if(ADInit == FALSE  &&  ADSampRdy == FALSE) {
-		temp_AD_H= ADC1->DRH;	       // read conversion result (MSB first!)
-		temp_AD_L= ADC1->DRL;	       // and store it to AD samples field
-		AD_sample[AD_samp]= ((u16)(temp_AD_H) << 2) | (temp_AD_L & 3);
-		if(++AD_samp >= NUMB_SAMP)	 // AD_smaple field is full?
-			ADSampRdy= TRUE;				   // YES - set field ready flag for main loop
-	}
-	else
-		ADInit= FALSE;					     // NO - ignore sample, wait for next one
-
+//	if(ADInit == FALSE  &&  ADSampRdy == FALSE) {
+//		temp_AD_H= ADC1->DRH;	       // read conversion result (MSB first!)
+//		temp_AD_L= ADC1->DRL;	       // and store it to AD samples field
+//		AD_sample[AD_samp]= ((u16)(temp_AD_H) << 2) | (temp_AD_L & 3);
+//		if(++AD_samp >= NUMB_SAMP)	 // AD_smaple field is full?
+//			ADSampRdy= TRUE;				   // YES - set field ready flag for main loop
+//	}
+//	else
+//		ADInit= FALSE;					     // NO - ignore sample, wait for next one
+        
    
-   
+   if (ADSampRdy == FALSE){
+     AD_sample[AD_samp] = ADC1_GetBufferValue(AD_samp);
+       if(++AD_samp> NUMB_CHAN)
+         ADSampRdy = TRUE;
+   }
 	ADC1->CSR&=~ADC1_CSR_EOC;			 // clear end of conversion flag
 	ADC1->CR1&=~ADC1_CR1_ADON;	   // stop ADC
 	return;

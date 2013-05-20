@@ -91,6 +91,16 @@
       <file>$PROJ_DIR$\Debug\Obj\stm8s_exti.o</file>
       <file>$PROJ_DIR$\Debug\Obj\stm8s_tim4.pbi</file>
       <file>$PROJ_DIR$\Debug\Obj\stm8s_iwdg.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdio.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$TOOLKIT_DIR$\lib\dlstm8smn.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ystdio.h</file>
     </outputs>
     <file>
       <name>$PROJ_DIR$\..\src\main.c</name>
@@ -107,11 +117,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 6 1 5 8 7 10 9 11 12 14 15 13 17 18 16 19 20 21 22 76 2 0</file>
+          <file> 6 1 5 8 7 10 9 11 12 14 15 13 17 18 16 19 20 21 22 76 2 88 87 85 89 93 92 86 91 90 94 0</file>
         </tool>
         <tool>
           <name>ICCSTM8</name>
-          <file> 6 1 5 8 7 10 9 11 12 14 15 13 17 18 16 19 20 21 22 76 2 0</file>
+          <file> 6 1 5 8 7 10 9 11 12 14 15 13 17 18 16 19 20 21 22 76 2 88 87 85 89 93 92 86 91 90 94 0</file>
         </tool>
       </inputs>
     </file>

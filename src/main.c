@@ -25,7 +25,8 @@
 #include "stm8s_it.h"
 #include "stm8s_adc1.h"
 #include "stm8s_gpio.h"
-#include "stdio.h"
+#include "string.h"
+#include <stdlib.h>
 #include "parameter.h"
 
 /* Private defines -----------------------------------------------------------*/
@@ -55,7 +56,31 @@ uint16_t average_result(uint16_t *p, uint8_t smp) {
         uint16_t AD_ch3_value;
         uint16_t AD_ch4_value;
         
-        uint8_t Stored_Data [20];
+        char Stored_Data [20];
+
+
+
+
+int itoa(int i, char* buf, int podst) {
+  int pos = 0;
+  char temp[20];
+  int size = 0;
+  do {
+    char ch = i % podst;
+    i /= podst;
+    buf[pos++] = ch + '0';
+  } while(i!=0);
+  buf[pos] = 0;
+  
+  strcpy(temp, buf);
+  for(int j=pos - 1; j>=0; j--){
+    buf[j]=temp[pos-j-1];
+  }
+  return pos;
+}
+
+
+
         
 void main(void)
 {
@@ -67,7 +92,7 @@ CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
 
 // UART1 CONFIGURATION
 UART1_DeInit();
-UART1_Init((uint32_t) 9600,
+UART1_Init((uint32_t) 256000,
            UART1_WORDLENGTH_8D,
            UART1_STOPBITS_1,
            UART1_PARITY_NO,
@@ -86,7 +111,7 @@ GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
   * co 0,5s
   */
 TIM2_DeInit();
-TIM2_TimeBaseInit(TIM2_PRESCALER_512, AUTORELOAD);
+TIM2_TimeBaseInit(TIM2_PRESCALER_32, AUTORELOAD);
 
 TIM2_ITConfig(TIM2_IT_UPDATE, ENABLE);
 
@@ -94,7 +119,7 @@ TIM2_ITConfig(TIM2_IT_UPDATE, ENABLE);
 
 ADC1_DeInit();
 ADC1_PrescalerConfig(ADC1_PRESSEL_FCPU_D8);
-ADC1_ConversionConfig(ADC1_CONVERSIONMODE_SINGLE, ADC1_CHANNEL_4, ADC1_ALIGN_LEFT);
+ADC1_ConversionConfig(ADC1_CONVERSIONMODE_SINGLE, ADC1_CHANNEL_4, ADC1_ALIGN_RIGHT);
 ADC1_SchmittTriggerConfig(ADC1_SCHMITTTRIG_CHANNEL4, DISABLE);
 ADC1_ITConfig(ADC1_IT_EOCIE, ENABLE);
 
@@ -122,12 +147,25 @@ TIM2_Cmd(ENABLE);
 	AD_ch2_value = AD_sample[2];
         AD_ch3_value = AD_sample[3];
         AD_ch4_value = AD_sample[4];
-        UART_send_str(" | probka:1 ");
-        UART_send_buf((uint8_t*) &AD_ch2_value, sizeof(AD_ch2_value));
-        UART_send_str(" | probka:2 ");
-        UART_send_buf((uint8_t*) &AD_ch3_value, sizeof(AD_ch3_value));
-        UART_send_str(" | probka:3 ");
-        UART_send_buf((uint8_t*) &AD_ch4_value, sizeof(AD_ch4_value));
+        //sprintf (Stored_Data, "%d,%d,%d\r\n", AD_ch2_value, AD_ch3_value, AD_ch4_value);
+
+        char delim[2] = "\0\0";
+        for(int i=2;i<=4;i++){
+          char tmp[20];
+          itoa(AD_sample[i],tmp,10);
+          strcat(Stored_Data,delim);
+          strcat(Stored_Data,tmp);
+          delim[0]=',';
+        }
+        strcat(Stored_Data,"\r\n");
+        UART_send_str(Stored_Data);
+        Stored_Data[0]=0;
+//        UART_send_str(" | probka:1 ");
+//        UART_send_buf((uint8_t*) &AD_ch2_value, sizeof(AD_ch2_value));
+//        UART_send_str(" | probka:2 ");
+//        UART_send_buf((uint8_t*) &AD_ch3_value, sizeof(AD_ch3_value));
+//        UART_send_str(" | probka:3 ");
+//        UART_send_buf((uint8_t*) &AD_ch4_value, sizeof(AD_ch4_value));
         ADSampRdy= FALSE;
         
        }
@@ -145,6 +183,9 @@ TIM2_Cmd(ENABLE);
   */
 void assert_failed(uint8_t* file, u32 line)
 { 
+  volatile uint8_t* f= file;
+  volatile u32 l= line;
+  
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 

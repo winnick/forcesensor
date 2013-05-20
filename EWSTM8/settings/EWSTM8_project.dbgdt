@@ -56,7 +56,7 @@
           
         <item>150</item><item>150</item><item>180</item><item>50</item></col-widths>
       </DRIVER_DATA_SAMPLE_SETUP>
-    <WATCH_1><expressions><item>AD_avg_value</item><item></item></expressions><col-names><item>Expression</item><item>Location</item><item>Type</item><item>Value</item></col-names><col-widths><item>100</item><item>150</item><item>100</item><item>100</item></col-widths></WATCH_1></Static>
+    <WATCH_1><expressions><item>AD_avg_value</item><item/></expressions><col-names><item>Expression</item><item>Location</item><item>Type</item><item>Value</item></col-names><col-widths><item>100</item><item>150</item><item>100</item><item>100</item></col-widths></WATCH_1></Static>
     <Windows>
       
       
